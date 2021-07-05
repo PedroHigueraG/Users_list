@@ -90,15 +90,63 @@ function printAlert(n,message){
 
 // Edit users
 function editUser(n){
-    console.log(jsonFile[n].name);
+
+    sessionStorage.setItem('id',jsonFile[n]._id);
+    sessionStorage.setItem('name',jsonFile[n].name);
+    sessionStorage.setItem('email',jsonFile[n].email);
+    sessionStorage.setItem('pass',jsonFile[n].password);
+
+    location.replace("assets/edit.html")
+
 }
+function loadUser(){
+    document.getElementById('editName').value=sessionStorage.getItem('name');
+    document.getElementById('editEmail').value=sessionStorage.getItem('email');
+    document.getElementById('editPassword').value=sessionStorage.getItem('pass');
+}
+
+async function editData(){
+    var id = sessionStorage.getItem('id');
+    var name = document.getElementById('editName').value;
+    var email = document.getElementById('editEmail').value;
+    var pass = document.getElementById('editPassword').value;
+
+    let user = {
+        'email': email,
+        'name': name,
+        'password': pass
+    };
+
+
+    if(confirm('Are you sure about editing this user?')){
+        try {
+            await fetch('https://flaskbasicapi.herokuapp.com/user/'+id,
+            {
+                method: 'PUT',
+                body: JSON.stringify(user),
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+            alert('User edited successful');
+            location.replace('../index.html');
+            
+        } catch {
+            var alertDiv = document.createElement('div');
+            alertDiv.innerHTML = '<div class="alert alert-danger" role="alert">We had a problem editing this user</div>';
+            container.appendChild(alertDiv);
+        }
+        
+    }
+}
+
 
 // Delelte users
 async function deleteUser(n){
 
     if(confirm('Are you sure about deleting this user?')){
         try{
-            let response = await fetch('https://flaskbasicapi.herokuapp.com/user/'+jsonFile[n]._id,
+            await fetch('https://flaskbasicapi.herokuapp.com/user/'+jsonFile[n]._id,
             {
                 method: 'DELETE',
             });
